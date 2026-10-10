@@ -357,3 +357,19 @@ details.more summary { cursor: pointer; color: var(--green); font-weight: 700; f
   .tabs button, .cta, .chip, .seg button { -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
 }
 @media print { .tabs, .cta-bar, .top, .demo-banner { display: none; } }
+
+/* ---- Totaux par membre & sortie de membre */
+.totals { display: flex; flex-direction: column; gap: 12px; }
+.totals-pick { margin-top: 12px; }
+.totals-pick .chips { margin: 0; }
+.kpis.four-mini { grid-template-columns: 1fr 1fr; gap: 8px; }
+.kpis.four-mini .mini b { font-size: 16px; }
+.t-info { color: #2563eb; }
+.name .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: 1px; }
+.mt-bar { height: 10px; border-radius: 99px; background: #e8eee9; overflow: hidden; margin: 10px 0 8px; }
+.mt-bar i { display: block; height: 100%; border-radius: 99px; transition: width .45s cubic-bezier(.2,.8,.2,1); }
+.mt-recv { height: 3px; border-radius: 99px; background: transparent; margin-top: 6px; }
+.mt-recv i { display: block; height: 100%; border-radius: 99px; background: #93c5fd; transition: width .45s; }
+.leave-box { border: 1px dashed var(--line); border-radius: 14px; padding: 12px; margin: 12px 0; display: flex; flex-direction: column; gap: 8px; }
+.top-seg { margin-bottom: 2px; }
+@media (prefers-reduced-motion: reduce) { .mt-bar i, .mt-recv i { transition: none; } }

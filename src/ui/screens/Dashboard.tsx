@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useStore } from '../../store/store.ts';
-import { balanceAt, balanceSeries, contributionRows, monthSummary, yearSummary, allOperations, paidFor } from '../../domain/finance.ts';
+import { balanceAt, balanceSeries, contributionRows, monthSummary, yearSummary, allOperations, memberTotals } from '../../domain/finance.ts';
 import { addMonths, fmtDate, MONTHS_SHORT, periodLabel, periodMonth, periodOf, periodYear, todayISO } from '../../domain/dates.ts';
 import { formatMAD } from '../../domain/money.ts';
 import type { Period } from '../../domain/types.ts';
@@ -33,9 +33,11 @@ export function Dashboard({ period, setPeriod, go }: { period: Period; setPeriod
   const balance = balanceAt(s, today);
   // Fenêtre des graphiques : les 12 derniers mois, sauf si on regarde plus loin
   const end = period <= cur && period > addMonths(cur, -12) ? cur : period;
-  const series = balanceSeries(s, end, 12);
-  const periodsUpTo = [...new Set(s.contributions.filter((c) => c.period <= period).map((c) => c.period))];
-  const lateAll = periodsUpTo.flatMap((p) => contributionRows(s, p, today).filter((r) => r.late));
+  const series = useMemo(() => balanceSeries(s, end, 12), [s, end]);
+  const lateAll = useMemo(() => {
+    const periodsUpTo = [...new Set(s.contributions.filter((c) => c.period <= period).map((c) => c.period))];
+    return periodsUpTo.flatMap((p) => contributionRows(s, p, today).filter((r) => r.late));
+  }, [s, period, today]);
   const lateTotal = lateAll.reduce((a, r) => a + r.remaining, 0);
   const bigExpenses = s.expenses.filter((e) => e.status === 'valid' && e.date.startsWith(period) && e.amount >= s.settings.largeExpenseThreshold);
   const recent = allOperations(s).filter((o) => o.item.status === 'valid').slice(0, 5);
@@ -48,16 +50,12 @@ export function Dashboard({ period, setPeriod, go }: { period: Period; setPeriod
     .sort((a, b) => b.value - a.value);
 
   // Cotisations de l'année par membre
-  const upTo = year === periodYear(cur) ? cur : `${year}-12`;
-  const memberRows = s.members
-    .map((mm) => {
-      const cs = s.contributions.filter((c) => c.memberId === mm.id && c.period.startsWith(String(year)) && c.period <= upTo);
-      const paid = cs.reduce((a, c) => a + Math.min(c.expected, paidFor(s, c.id)), 0);
-      const expected = cs.reduce((a, c) => a + c.expected, 0);
-      const late = cs.filter((c) => paidFor(s, c.id) < c.expected && today > c.dueDate).length;
-      return { id: mm.id, name: mm.name, color: colorOfMember(s, mm.id), paid, expected, late };
-    })
-    .filter((r) => r.expected > 0);
+  const memberRows = useMemo(() => {
+    const upTo = year === periodYear(cur) ? today : `${year}-12-31`;
+    return memberTotals(s, `${year}-01-01`, upTo, today)
+      .rows.filter((r) => r.expected > 0)
+      .map((r) => ({ id: r.memberId, name: r.name, color: colorOfMember(s, r.memberId), paid: r.paidForPeriod, expected: r.expected, late: r.lateMonths }));
+  }, [s, year, cur, today]);
 
   return (
     <div className="screen">
