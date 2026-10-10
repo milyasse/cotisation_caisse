@@ -373,3 +373,7 @@ details.more summary { cursor: pointer; color: var(--green); font-weight: 700; f
 .leave-box { border: 1px dashed var(--line); border-radius: 14px; padding: 12px; margin: 12px 0; display: flex; flex-direction: column; gap: 8px; }
 .top-seg { margin-bottom: 2px; }
 @media (prefers-reduced-motion: reduce) { .mt-bar i, .mt-recv i { transition: none; } }
+.crash { max-width: 480px; margin: 18vh auto 0; padding: 24px 18px; display: flex; flex-direction: column; gap: 12px; text-align: center; }
+.crash h2 { margin: 0; font-size: 20px; }
+.crash p { margin: 0; color: var(--muted); }
+.crash details { font-size: 12px; color: var(--muted); text-align: left; }
